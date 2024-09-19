@@ -11454,44 +11454,45 @@ function loseUsingItem(oKart) {
 		loseUsingItems(oKart);
 }
 function dropCurrentItem(oKart) {
-	var sArme = oKart.arme;
-	if (!sArme) return;
-	var sRoulette = oKart.roulette;
-	var iKart = aKarts.indexOf(oKart);
-	consumeItem(iKart);
-	consumeItemIfDouble(iKart);
+	for (let j = 0; j < 2; j++) {
+		var sArme = oKart.arme;
+		var sRoulette = oKart.roulette;
+		if (!sArme || !sRoulette || sRoulette < 25) continue;
+		if (isOnline && (oKart.id != identifiant) && (oKart.controller != identifiant)) continue;
+		var iKart = aKarts.indexOf(oKart);
+		consumeItem(iKart);
+		var itemCount = 1;
+		var sArmeCountRegex = sArme.match(/^(.+)X(\d+)$/);
+		if (sArmeCountRegex) {
+			sArme = sArmeCountRegex[1];
+			itemCount = +sArmeCountRegex[2];
+		}
+		var itemType;
+		switch (sArme) {
+		case "champi":
+		case "etoile":
+		case "banane":
+		case "carapace":
+		case "poison":
+		case "fauxobjet":
+			itemType = sArme;
+			break;
+		case "carapacerouge":
+			itemType = "carapace-rouge";
+			break;
+		}
+		if (itemType) {
+			for (var i=0;i<itemCount;i++) {
+				var rAngle = oKart.rotation*Math.PI/180 + (Math.random()-0.5)*0.9*Math.PI, rDist = 9 + Math.random()*6;
+				var item = {type: itemType, team:oKart.team, x:oKart.x - rDist*Math.sin(rAngle), y:oKart.y - rDist*Math.cos(rAngle), z:0};
+				dropNewItem(oKart, item);
+				item.sprite[0].fadein(200);
+			}
+		}
+	}
 	delete oKart.champiType;
 	delete oKart.champior;
 	delete oKart.champior0;
-	if (sRoulette < 25) return;
-	if (isOnline && (oKart.id != identifiant) && (oKart.controller != identifiant)) return;
-	var itemCount = 1;
-	var sArmeCountRegex = sArme.match(/^(.+)X(\d+)$/);
-	if (sArmeCountRegex) {
-		sArme = sArmeCountRegex[1];
-		itemCount = +sArmeCountRegex[2];
-	}
-	var itemType;
-	switch (sArme) {
-	case "champi":
-	case "etoile":
-	case "banane":
-	case "carapace":
-	case "poison":
-		itemType = sArme;
-		break;
-	case "carapacerouge":
-		itemType = "carapace-rouge";
-		break;
-	}
-	if (itemType) {
-		for (var i=0;i<itemCount;i++) {
-			var rAngle = oKart.rotation*Math.PI/180 + (Math.random()-0.5)*0.9*Math.PI, rDist = 9 + Math.random()*6;
-			var item = {type: itemType, team:oKart.team, x:oKart.x - rDist*Math.sin(rAngle), y:oKart.y - rDist*Math.cos(rAngle), z:0};
-			dropNewItem(oKart, item);
-			item.sprite[0].fadein(200);
-		}
-	}
 }
 function deleteUsingItems(oKart) {
 	for (var i=oKart.using.length-1;i>=0;i--)
