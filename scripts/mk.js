@@ -2976,6 +2976,33 @@ function playSoundEffect(src) {
 	document.body.appendChild(elt);
 	return elt;
 }
+let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+let loadedSfx = {};
+function loadSfx(src) {
+	if (loadedSfx[src])
+		return;
+
+	loadedSfx[src] = "occupied";
+	fetch(src)
+		.then(response => response.arrayBuffer())
+		.then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+		.then(audioBuffer => {
+			loadedSfx[src] = audioBuffer;
+		});
+}
+function playLoadedSfx(src) {
+    if (src in loadedSfx) {
+        let gainNode = audioContext.createGain();
+        gainNode.gain.value = vSfx;
+        gainNode.connect(audioContext.destination);
+
+        let source = audioContext.createBufferSource();
+        source.buffer = loadedSfx[src];
+        source.connect(gainNode);
+
+        source.start(0);
+    }
+}
 function playDistSound(obj, src, maxDist) {
 	if (iSfx) {
 		var pow0 = maxDist/distKart(obj);
@@ -4933,6 +4960,11 @@ function startGame() {
 		showRearView(0);
 	if (!isOnline)
 		document.body.style.cursor = "default";
+
+	let powSfxPath = "musics/events/pow.mp3";
+	for (spotDistribution of itemDistribution.value)
+		if (spotDistribution.pow && !loadedSfx[powSfxPath])
+			loadSfx(powSfxPath);
 }
 
 function showVirtualKeyboard() {
@@ -7209,7 +7241,7 @@ var itemBehaviors = {
 					var oKart = aKarts[i];
 
 					if (!iTime && iSfx && !finishing && oKart === oPlayers[0])
-						playSoundEffect("musics/events/pow.mp3");
+						playLoadedSfx("musics/events/pow.mp3");
 
 					if (oKart === oKartOwner || !friendlyFire(oKart,oKartOwner)) {
 						if (!onlineSpectatorId) { // i < oPlayers.length
@@ -15135,7 +15167,8 @@ function powEffect(i, oKart, fSprite) {
 
 	loseUsingItems(oKart);
 	dropCurrentItem(oKart);
-	oKart.spin(spinPower);
+	if (!oKart.tourne)
+		oKart.spin(spinPower);
 	oKart.champi = 0;
 	delete oKart.champiType;
 	stopDrifting(i);
