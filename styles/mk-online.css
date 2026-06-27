@@ -213,6 +213,13 @@
 .online-chat-pseudo {
     margin-bottom: 1px;
 }
+.online-chat-pseudo span.dark-char {
+    text-shadow:
+    1px  1px 0 grey,
+    -1px  1px 0 grey,
+    1px -1px 0 grey,
+    -1px -1px 0 grey;
+}
 .online-chat-message {
     font-size: 1.2em;
 }

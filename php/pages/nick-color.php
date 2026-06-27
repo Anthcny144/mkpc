@@ -147,7 +147,7 @@ if (isset($success))
 	<?php
 	if ($language) {
 		?>
-	This page allows you to change your username color as it appears on the forum.<br />
+	This page allows you to change your username color as it appears on the forum as well as in the online chat.<br />
 	For that, it's simple: insert the colors of your choice in the field below
 	using the beacon bbCode <span style="font-family:Monospace">[color]</span>, as you would in a message on the forum.<br />
 	Example:
@@ -155,7 +155,7 @@ if (isset($success))
 	}
 	else {
 		?>
-	Cette page vous permet de modifier la couleur du pseudo tel qu'il apparait sur le forum.<br />
+	Cette page vous permet de modifier la couleur du pseudo tel qu'il apparait sur le forum ainsi que dans le chat en ligne.<br />
 	Pour cela, c'est simple : insérez les couleurs de votre choix dans le champ ci-dessous
 	en utilisant la balise bbCode <span style="font-family:Monospace">[color]</span>, comme vous feriez dans un message sur le forum.<br />
 	Exemple : 

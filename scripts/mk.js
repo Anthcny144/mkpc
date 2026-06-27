@@ -34287,9 +34287,9 @@ function setChat() {
 						var messages = rCode[1];
 						if (messages.length) {
 							var lastMsgId = messages.length-1;
-							iChatLastMsg = messages[lastMsgId][2];
+							iChatLastMsg = messages[lastMsgId][3];
 							for (var i=0;i<=lastMsgId;i++)
-								addMsgToChat(messages[i][0],messages[i][1]);
+								addMsgToChat(messages[i][0],messages[i][1],messages[i][2]);
 							var pMessages = oMessages.getElementsByTagName("p");
 							var cMessages = oMessages.getElementsByClassName("online-chat-message");
 							while (pMessages.length+cMessages.length > 40)
@@ -34311,17 +34311,37 @@ function setChat() {
 		else
 			document.body.removeChild(oChat);
 	}
-	function addMsgToChat(pseudo, message) {
+	function addMsgToChat(pseudo, nickColor, message) {
 		var $lastMsg = oMessages.children[oMessages.children.length - 1];
 		var oP;
 		if (!$lastMsg || $lastMsg.dataset.pseudo !== pseudo || $lastMsg.dataset.lastts < Date.now() - 40000) {
+			function isTooDark(r, g, b) {
+				const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+				return luminance < 0.25;
+			}
+			
+			function toRGB(color) {
+				const tmp = document.createElement("div");
+				tmp.style.color = color;
+				document.body.appendChild(tmp);
+				const computed = getComputedStyle(tmp).color;
+				document.body.removeChild(tmp);
+				return computed.match(/\d+/g).map(Number);
+			}
+
 			oP = document.createElement("p");
 			oP.dataset.pseudo = pseudo;
 			oP.dataset.lastts = Date.now();
 			var sPseudo = document.createElement("div");
 			sPseudo.className = "online-chat-pseudo";
-			sPseudo.innerHTML = pseudo;
+			sPseudo.innerHTML = nickColor;
 			oP.appendChild(sPseudo);
+
+			sPseudo.querySelectorAll("span").forEach(span => {
+				const [r, g, b] = toRGB(span.style.color);
+				if (isTooDark(r, g, b))
+					span.classList.add("dark-char");
+			});
 		}
 		var sMessage = document.createElement("div");
 		sMessage.style.color = "white";
