@@ -29339,7 +29339,7 @@ function handleMatchmakingSuccess(reponse) {
 	}
 	selectMapScreen({ racecountdown: reponse.time-5 });
 	dRest();
-	setTimeout(setChat, 1);
+	setTimeout(setChat, 1000);
 }
 function addFancyTitle(options) {
 	var $elt = options.elt;
@@ -34296,7 +34296,7 @@ function setChat() {
 							var lastMsgId = messages.length-1;
 							iChatLastMsg = messages[lastMsgId][3];
 							for (var i=0;i<=lastMsgId;i++)
-								addMsgToChat(messages[i][0],messages[i][1],messages[i][2]);
+								addMsgToChat(messages[i][0], messages[i][1], messages[i][2]);
 							var pMessages = oMessages.getElementsByTagName("p");
 							var cMessages = oMessages.getElementsByClassName("online-chat-message");
 							while (pMessages.length+cMessages.length > 40)
@@ -34336,12 +34336,49 @@ function setChat() {
 				return computed.match(/\d+/g).map(Number);
 			}
 
+			function getPlayerTeamIndex(nick) {
+				// if player is not in a team
+				if (!isTeamPlay() || aTeams.length === 0)
+					return null;
+
+				const onlinePlayers = jConnectes.querySelectorAll("div.online-chat-playerlistelt");
+
+				// search player through list of online players
+				let ignoreSpecs = 0;
+				for (let i = 0; i < onlinePlayers.length; i++) {
+					const onlinePlayer = onlinePlayers[i];
+					const onlineNick = onlinePlayer.querySelector("span.online-chat-playerlistname").textContent;
+					const isSpec = getComputedStyle(onlinePlayer.querySelector("img.online-chat-spectator")).display !== "none";
+
+					// decrease i in aTeams for each spectator
+					if (isSpec)
+						ignoreSpecs++;
+
+					if (onlineNick === nick) {
+						if (isSpec)
+							return null;
+						return aTeams[i + (!onlineSpectatorId ? 1 : 0) - ignoreSpecs];
+					}
+				}
+
+				// if nick not found, team of self
+				if (onlineSpectatorId)
+					return null;
+				return aTeams[0];
+			}
+
+			const teamIdx = getPlayerTeamIndex(pseudo);
+
 			oP = document.createElement("p");
 			oP.dataset.pseudo = pseudo;
 			oP.dataset.lastts = Date.now();
 			var sPseudo = document.createElement("div");
 			sPseudo.className = "online-chat-pseudo";
-			sPseudo.innerHTML = nickColor;
+
+			if (teamIdx === null) // player is not in a team, take colored nick
+				sPseudo.innerHTML = nickColor;
+			else // player is in a team, take team color
+				sPseudo.innerHTML = `<span style="color: ${cTeamColors.primary[teamIdx]}">${pseudo}</span>`;
 			oP.appendChild(sPseudo);
 
 			sPseudo.querySelectorAll("span").forEach(span => {
