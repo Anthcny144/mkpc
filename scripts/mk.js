@@ -34087,8 +34087,15 @@ function setChat() {
 		if (rMessage.value) {
 			var msgValue = rMessage.value;
 			xhr("parler.php", "msg="+encodeURIComponent(msgValue).replace(/\+/g, "%2B") + (onlineSpectatorId ? "&spectator="+onlineSpectatorId : ""), function(reponse) {
+				try {
+					reponse = JSON.parse(reponse);
+				}
+				catch (e) {
+					return false;
+				}
+				const [resType, nickColor] = reponse;
 				var failureMsg;
-				switch (+reponse) {
+				switch (+resType) {
 				case -1:
 					failureMsg = toLanguage("inappropriate words", "mots inappropriés");
 					break;
@@ -34099,7 +34106,7 @@ function setChat() {
 					failureMsg = toLanguage("too long", "trop long");
 					break;
 				case -4:
-					addMsgToChat(mPseudo, msgValue);
+					addMsgToChat(mPseudo, nickColor, msgValue);
 					break;
 				}
 				if (failureMsg) {

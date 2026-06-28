@@ -7,6 +7,7 @@ if (isset($_POST['msg'])) {
 		include('../includes/getId.php');
 		include('../includes/initdb.php');
 		include('../includes/onlineUtils.php');
+		include('../includes/avatars.php');
 		$course = getCourse(array('check_ban' => true));
 		if ($course) {
 			function log_blacklist_msg($resultCode, $msgId) {
@@ -22,9 +23,16 @@ if (isset($_POST['msg'])) {
 			function return_failure($resultCode, $shouldLog=true) {
 				if ($shouldLog)
 					log_blacklist_msg($resultCode, 0);
-				echo $resultCode;
+				$nickColor = $resultCode === -4 ? getNickColor() : null;
+				$res = [$resultCode, $nickColor];
+				echo json_encode($res);
 				mysql_close();
 				exit;
+			}
+			function getNickColor() {
+				global $id;
+				$res = mysql_fetch_array(mysql_query('SELECT nick_color FROM `mkprofiles` WHERE id="'. $id .'"'));
+				return get_pseudo_bbcolor($res['nick_color']);
 			}
 			$isMuted = mysql_fetch_array(mysql_query('SELECT player FROM mkmuted WHERE player="'. $id .'" OR identifiant="'. $identifiants[0] .'"'));
 			if ($isMuted)
@@ -83,5 +91,5 @@ if (isset($_POST['msg'])) {
 		mysql_close();
 	}
 }
-echo '1';
+echo json_encode([1, null]);
 ?>
